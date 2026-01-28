@@ -16,7 +16,7 @@ brew install telnyx/tap/telnyx
 
 ## Requirements
 
-- Node.js 18+
+- Node.js 20+
 
 ## Quick Start
 
