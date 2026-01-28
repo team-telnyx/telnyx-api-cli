@@ -34,14 +34,13 @@ api_call() {
     curl "${args[@]}" "${API_BASE}${endpoint}"
 }
 
-format_output() {
-    local json="$1"
-    local format_cmd="${2:-cat}"
-    
-    if [[ "$OUTPUT_JSON" == "true" ]]; then
-        echo "$json" | jq .
-    else
-        echo "$json" | eval "$format_cmd"
+# Validate ID format (UUIDs or TCR IDs)
+validate_id() {
+    local id="$1"
+    local name="${2:-ID}"
+    # Allow UUIDs and TCR-style IDs (alphanumeric with dashes)
+    if [[ ! "$id" =~ ^[a-zA-Z0-9-]+$ ]]; then
+        die "Invalid $name format: $id"
     fi
 }
 
@@ -71,6 +70,7 @@ cmd_brand_list() {
 cmd_brand_get() {
     local brand_id="$1"
     [[ -z "$brand_id" ]] && die "Usage: telnyx 10dlc brand get <brandId>"
+    validate_id "$brand_id" "brand ID"
     
     info "Fetching brand $brand_id..."
     local response
@@ -211,6 +211,7 @@ cmd_brand_verify() {
     
     [[ -z "$brand_id" ]] && die "Usage: telnyx 10dlc brand verify <brandId> --pin <PIN>"
     [[ -z "$pin" ]] && die "PIN required (--pin)"
+    validate_id "$brand_id" "brand ID"
     
     info "Submitting verification for brand $brand_id..."
     
@@ -242,6 +243,7 @@ cmd_campaign_list() {
     
     local endpoint="/campaign"
     if [[ -n "$brand_id" ]]; then
+        validate_id "$brand_id" "brand ID"
         endpoint="/campaign?brandId=$brand_id"
     fi
     
@@ -267,6 +269,7 @@ cmd_campaign_list() {
 cmd_campaign_get() {
     local campaign_id="$1"
     [[ -z "$campaign_id" ]] && die "Usage: telnyx 10dlc campaign get <campaignId>"
+    validate_id "$campaign_id" "campaign ID"
     
     info "Fetching campaign $campaign_id..."
     local response
@@ -398,6 +401,12 @@ cmd_assign() {
     
     [[ -z "$phone_number" ]] && die "Usage: telnyx 10dlc assign <phoneNumber> <campaignId>"
     [[ -z "$campaign_id" ]] && die "Usage: telnyx 10dlc assign <phoneNumber> <campaignId>"
+    
+    # Validate phone number format (E.164)
+    if [[ ! "$phone_number" =~ ^\+?[0-9]+$ ]]; then
+        die "Invalid phone number format. Use E.164 format (e.g., +12025551234)"
+    fi
+    validate_id "$campaign_id" "campaign ID"
     
     local payload
     payload=$(jq -n \
