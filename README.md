@@ -5,7 +5,13 @@ Official command-line interface for Telnyx APIs. Manage phone numbers, send mess
 ## Installation
 
 ```bash
-npm install -g @telnyx/cli
+npm install -g @telnyx/api-cli
+```
+
+Or with Homebrew (coming soon):
+
+```bash
+brew install telnyx/tap/telnyx
 ```
 
 ## Requirements
@@ -90,6 +96,11 @@ telnyx number delete +15551234567 --force
 telnyx message send --from +15551234567 --to +15559876543 --text "Hello!"
 telnyx message send -f +15551234567 -t +15559876543 --text "Check this" --media https://example.com/image.jpg
 
+# List messages
+telnyx message list
+telnyx message list --direction outbound --limit 50
+telnyx message list --from +15551234567
+
 # Get message details
 telnyx message get <message-id>
 ```
@@ -109,6 +120,11 @@ telnyx messaging-profile delete <id> --force
 # Make outbound calls
 telnyx call dial --from +15551234567 --to +15559876543 --connection-id <id>
 telnyx call dial -f +15551234567 -t +15559876543 --connection-id <id> --answering-machine-detection detect
+
+# List calls
+telnyx call list
+telnyx call list --direction outgoing --status active
+telnyx call list --from +15551234567
 
 # Call control
 telnyx call hangup <call-control-id>
@@ -325,6 +341,19 @@ telnyx billing balance
 telnyx billing group list
 telnyx billing group create --name "Production"
 telnyx billing group delete <id> --force
+```
+
+### Debugger (Webhook Deliveries)
+
+```bash
+# List recent webhook deliveries
+telnyx debugger list
+telnyx debugger list --status failed
+telnyx debugger list --event-type message.received
+telnyx debugger list --since 2024-01-01
+
+# Get full delivery details (including HTTP request/response)
+telnyx debugger get <delivery-id>
 ```
 
 ---
