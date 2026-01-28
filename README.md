@@ -381,12 +381,47 @@ telnyx number list --json
 telnyx autocomplete
 ```
 
+## Output Formats
+
+```bash
+# Default table output
+telnyx message list
+
+# JSON output
+telnyx message list --json
+telnyx message list --output json
+
+# CSV for spreadsheets/scripts
+telnyx message list --output csv > messages.csv
+
+# TSV (tab-separated)
+telnyx message list --output tsv
+
+# Just IDs (for piping)
+telnyx message list --output ids | xargs -I {} telnyx message get {}
+```
+
+## Profile Management
+
+```bash
+# List profiles
+telnyx profile list
+
+# Switch default profile
+telnyx profile use production
+
+# Delete a profile
+telnyx profile delete staging --force
+```
+
 ## Global Flags
 
 | Flag | Description |
 |------|-------------|
 | `--profile <name>` | Use a specific config profile |
 | `--json` | Output raw JSON |
+| `--output <format>` | Output format (table, json, csv, tsv, ids) |
+| `--verbose` | Show API requests for debugging |
 | `--help` | Show help |
 
 ## Whoami

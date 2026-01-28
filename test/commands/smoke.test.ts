@@ -81,6 +81,11 @@ describe('smoke tests', () => {
     // Lookup
     'lookup number',
     
+    // Profile
+    'profile list',
+    'profile use',
+    'profile delete',
+    
     // Porting
     'porting check',
     'porting order list',

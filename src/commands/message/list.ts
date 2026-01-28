@@ -43,6 +43,8 @@ export default class MessageList extends BaseCommand {
     '<%= config.bin %> message list --direction outbound',
     '<%= config.bin %> message list --from +15551234567',
     '<%= config.bin %> message list --limit 50 --json',
+    '<%= config.bin %> message list --output csv > messages.csv',
+    '<%= config.bin %> message list --output ids | xargs -I {} telnyx message get {}',
   ]
 
   static override flags = {
@@ -100,45 +102,56 @@ export default class MessageList extends BaseCommand {
       params.set('filter[messaging_profile_id]', flags['messaging-profile-id'])
     }
 
-    this.info('Fetching messages...')
+    const format = this.getOutputFormat(flags)
+    
+    if (format === 'table') {
+      this.info('Fetching messages...')
+    }
 
     const response = await v2.get<MessageListResponse>(`/messages?${params.toString()}`, { profile: flags.profile })
 
-    if (flags.json) {
+    // For full JSON output, return the raw response
+    if (format === 'json' && !flags.output) {
       this.outputJson(response)
       return
     }
 
     const messages = response.data || []
 
-    if (messages.length === 0) {
+    if (messages.length === 0 && format === 'table') {
       this.log('No messages found')
       return
     }
 
     const tableData = messages.map(m => ({
-      id: m.id.substring(0, 16) + '...',
-      direction: m.direction === 'outbound' ? '→' : '←',
+      id: m.id,
+      direction: format === 'table' ? (m.direction === 'outbound' ? '→' : '←') : m.direction,
       type: m.type,
       from: m.from.phone_number,
       to: m.to[0]?.phone_number || '-',
       status: m.to[0]?.status || '-',
-      text: (m.text || '').substring(0, 30) + ((m.text?.length || 0) > 30 ? '...' : ''),
-      created: new Date(m.created_at).toLocaleString(),
+      text: format === 'table' 
+        ? (m.text || '').substring(0, 30) + ((m.text?.length || 0) > 30 ? '...' : '')
+        : m.text || '',
+      created: format === 'table' ? new Date(m.created_at).toLocaleString() : m.created_at,
     }))
 
-    this.outputTable(tableData as unknown as Record<string, unknown>[], {
-      id: { header: 'ID' },
-      direction: { header: 'DIR' },
-      type: { header: 'TYPE' },
-      from: { header: 'FROM' },
-      to: { header: 'TO' },
-      status: { header: 'STATUS' },
-      text: { header: 'TEXT' },
-      created: { header: 'CREATED' },
-    })
+    this.outputTable(
+      tableData as unknown as Record<string, unknown>[],
+      {
+        id: { header: 'ID' },
+        direction: { header: 'DIR' },
+        type: { header: 'TYPE' },
+        from: { header: 'FROM' },
+        to: { header: 'TO' },
+        status: { header: 'STATUS' },
+        text: { header: 'TEXT' },
+        created: { header: 'CREATED' },
+      },
+      { format, idField: 'id' }
+    )
 
-    if (response.meta) {
+    if (format === 'table' && response.meta) {
       this.log('')
       this.log(`Page ${response.meta.page_number} of ${response.meta.total_pages} (${response.meta.total_results} total)`)
     }

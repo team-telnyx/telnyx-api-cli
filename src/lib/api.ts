@@ -80,6 +80,7 @@ export class TelnyxApiError extends Error {
   detail?: string
   hint?: string
   statusCode?: number
+  requestId?: string
 
   constructor(error: ApiError, statusCode?: number) {
     const hint = ERROR_HINTS[error.code]
@@ -92,6 +93,15 @@ export class TelnyxApiError extends Error {
     this.hint = hint
     this.statusCode = statusCode
   }
+
+  /** Format error with request ID for support tickets */
+  toSupportString(): string {
+    let msg = `Error: ${this.message}\nCode: ${this.code}`
+    if (this.requestId) {
+      msg += `\nRequest ID: ${this.requestId}`
+    }
+    return msg
+  }
 }
 
 let verboseLogger: ((msg: string) => void) | null = null
@@ -100,11 +110,20 @@ export function setVerboseLogger(logger: (msg: string) => void): void {
   verboseLogger = logger
 }
 
+// Rate limit retry configuration
+const RATE_LIMIT_MAX_RETRIES = 3
+const RATE_LIMIT_BASE_DELAY_MS = 1000
+
+async function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
 async function makeRequest<T>(
   baseUrl: string,
   method: string,
   endpoint: string,
-  options: ApiOptions & { body?: unknown } = {}
+  options: ApiOptions & { body?: unknown } = {},
+  retryCount = 0
 ): Promise<T> {
   const apiKey = getApiKey(options.profile)
   
@@ -144,6 +163,24 @@ async function makeRequest<T>(
   const response = await fetch(url, fetchOptions)
   const elapsed = Date.now() - startTime
 
+  // Get request ID from response headers for debugging
+  const requestId = response.headers.get('x-request-id') || response.headers.get('x-telnyx-request-id')
+
+  // Handle rate limiting with exponential backoff
+  if (response.status === 429 && retryCount < RATE_LIMIT_MAX_RETRIES) {
+    const retryAfter = response.headers.get('retry-after')
+    const delayMs = retryAfter 
+      ? parseInt(retryAfter, 10) * 1000 
+      : RATE_LIMIT_BASE_DELAY_MS * Math.pow(2, retryCount)
+    
+    if (options.verbose && verboseLogger) {
+      verboseLogger(`Rate limited. Retrying in ${delayMs}ms (attempt ${retryCount + 1}/${RATE_LIMIT_MAX_RETRIES})`)
+    }
+    
+    await sleep(delayMs)
+    return makeRequest<T>(baseUrl, method, endpoint, options, retryCount + 1)
+  }
+
   // Handle empty responses (204 No Content)
   let data: ApiResponse<T>
   const contentType = response.headers.get('content-type')
@@ -154,7 +191,7 @@ async function makeRequest<T>(
   }
 
   if (options.verbose && verboseLogger) {
-    verboseLogger(`Response: ${response.status} (${elapsed}ms)`)
+    verboseLogger(`Response: ${response.status} (${elapsed}ms)${requestId ? ` [${requestId}]` : ''}`)
   }
 
   if (!response.ok) {
@@ -162,7 +199,9 @@ async function makeRequest<T>(
       code: `HTTP_${response.status}`, 
       title: response.statusText || 'Request failed' 
     }
-    throw new TelnyxApiError(error, response.status)
+    const apiError = new TelnyxApiError(error, response.status)
+    apiError.requestId = requestId || undefined
+    throw apiError
   }
 
   return data as T
