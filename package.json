@@ -23,7 +23,10 @@
   "devDependencies": {
     "@oclif/prettier-config": "^0.2.1",
     "@oclif/test": "^4",
+    "@types/chai": "^5.2.3",
+    "@types/mocha": "^10.0.10",
     "@types/node": "^18",
+    "chai": "^6.2.2",
     "mocha": "^10",
     "oclif": "^4",
     "shx": "^0.3.3",
@@ -72,38 +75,102 @@
     ],
     "topicSeparator": " ",
     "topics": {
-      "auth": { "description": "Manage API authentication" },
-      "10dlc": { "description": "10DLC brand and campaign registration" },
-      "10dlc:brand": { "description": "Manage 10DLC brands" },
-      "10dlc:campaign": { "description": "Manage 10DLC campaigns" },
-      "ai": { "description": "AI inference (chat, embeddings)" },
-      "assistant": { "description": "AI voice assistants" },
-      "billing": { "description": "Account balance and billing groups" },
-      "billing:group": { "description": "Manage billing groups" },
-      "call": { "description": "Voice call control" },
-      "connection": { "description": "Voice connections and applications" },
-      "e911": { "description": "E911 emergency services" },
-      "e911:address": { "description": "Emergency addresses" },
-      "fax": { "description": "Send and receive faxes" },
-      "lookup": { "description": "Phone number lookup" },
-      "message": { "description": "Send and manage SMS/MMS messages" },
-      "messaging-profile": { "description": "Messaging profile configuration" },
-      "number": { "description": "Phone number management" },
-      "porting": { "description": "Number porting" },
-      "porting:order": { "description": "Port-in orders" },
-      "sim": { "description": "IoT SIM card management" },
-      "storage": { "description": "Cloud storage (S3-compatible)" },
-      "storage:bucket": { "description": "Storage buckets" },
-      "storage:object": { "description": "Storage objects" },
-      "usage": { "description": "Usage reports and analytics" },
-      "verify": { "description": "Phone verification (2FA)" },
-      "verify:profile": { "description": "Verify profiles" },
-      "verify:template": { "description": "Verification message templates" },
-      "video": { "description": "Video rooms and conferencing" },
-      "video:room": { "description": "Video room management" },
-      "video:session": { "description": "Video sessions" },
-      "video:recording": { "description": "Video recordings" },
-      "voice-profile": { "description": "Outbound voice profiles" }
+      "auth": {
+        "description": "Manage API authentication"
+      },
+      "10dlc": {
+        "description": "10DLC brand and campaign registration"
+      },
+      "10dlc:brand": {
+        "description": "Manage 10DLC brands"
+      },
+      "10dlc:campaign": {
+        "description": "Manage 10DLC campaigns"
+      },
+      "ai": {
+        "description": "AI inference (chat, embeddings)"
+      },
+      "assistant": {
+        "description": "AI voice assistants"
+      },
+      "billing": {
+        "description": "Account balance and billing groups"
+      },
+      "billing:group": {
+        "description": "Manage billing groups"
+      },
+      "call": {
+        "description": "Voice call control"
+      },
+      "connection": {
+        "description": "Voice connections and applications"
+      },
+      "e911": {
+        "description": "E911 emergency services"
+      },
+      "e911:address": {
+        "description": "Emergency addresses"
+      },
+      "fax": {
+        "description": "Send and receive faxes"
+      },
+      "lookup": {
+        "description": "Phone number lookup"
+      },
+      "message": {
+        "description": "Send and manage SMS/MMS messages"
+      },
+      "messaging-profile": {
+        "description": "Messaging profile configuration"
+      },
+      "number": {
+        "description": "Phone number management"
+      },
+      "porting": {
+        "description": "Number porting"
+      },
+      "porting:order": {
+        "description": "Port-in orders"
+      },
+      "sim": {
+        "description": "IoT SIM card management"
+      },
+      "storage": {
+        "description": "Cloud storage (S3-compatible)"
+      },
+      "storage:bucket": {
+        "description": "Storage buckets"
+      },
+      "storage:object": {
+        "description": "Storage objects"
+      },
+      "usage": {
+        "description": "Usage reports and analytics"
+      },
+      "verify": {
+        "description": "Phone verification (2FA)"
+      },
+      "verify:profile": {
+        "description": "Verify profiles"
+      },
+      "verify:template": {
+        "description": "Verification message templates"
+      },
+      "video": {
+        "description": "Video rooms and conferencing"
+      },
+      "video:room": {
+        "description": "Video room management"
+      },
+      "video:session": {
+        "description": "Video sessions"
+      },
+      "video:recording": {
+        "description": "Video recordings"
+      },
+      "voice-profile": {
+        "description": "Outbound voice profiles"
+      }
     }
   },
   "scripts": {
