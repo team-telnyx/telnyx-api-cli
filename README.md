@@ -1,25 +1,16 @@
-# Telnyx API CLI
+# Telnyx CLI
 
-Command-line interface for Telnyx public APIs.
+Official command-line interface for Telnyx APIs.
 
 ## Installation
 
 ```bash
-npm install -g @telnyx/api-cli
-```
-
-Or with Homebrew (coming soon):
-
-```bash
-brew install telnyx-cli
+npm install -g @telnyx/cli
 ```
 
 ## Requirements
 
-- `curl` - HTTP client
-- `jq` - JSON processor
-
-Both are pre-installed on most macOS/Linux systems.
+- Node.js 18+
 
 ## Quick Start
 
@@ -36,7 +27,7 @@ telnyx 10dlc wizard
 
 ## Authentication
 
-The CLI needs your Telnyx API key. Get one from [portal.telnyx.com](https://portal.telnyx.com).
+Get your API key from [portal.telnyx.com](https://portal.telnyx.com).
 
 ### Option 1: Interactive setup (recommended)
 
@@ -44,12 +35,19 @@ The CLI needs your Telnyx API key. Get one from [portal.telnyx.com](https://port
 telnyx auth setup
 ```
 
-This stores your key securely in `~/.config/telnyx/config.json`.
+Stores your key securely in `~/.config/telnyx/config.json`.
 
 ### Option 2: Environment variable
 
 ```bash
 export TELNYX_API_KEY=KEY_xxxxxxxxxxxxx
+```
+
+### Multiple profiles
+
+```bash
+telnyx auth setup --profile production
+telnyx 10dlc brand list --profile production
 ```
 
 ## Modules
@@ -59,41 +57,73 @@ export TELNYX_API_KEY=KEY_xxxxxxxxxxxxx
 Register brands and campaigns for US A2P SMS messaging.
 
 ```bash
-# Interactive wizard (recommended for first-time users)
+# Interactive wizard (recommended)
 telnyx 10dlc wizard
 
-# Or use individual commands
+# Brand management
 telnyx 10dlc brand list
+telnyx 10dlc brand get <brandId>
 telnyx 10dlc brand create --sole-prop --display-name "My Business" ...
 telnyx 10dlc brand verify <brandId> --pin <OTP>
 
-telnyx 10dlc campaign list
+# Campaign management
+telnyx 10dlc campaign list <brandId>
 telnyx 10dlc campaign create --brand-id <id> --usecase MIXED ...
 
+# Phone number assignment
 telnyx 10dlc assign +12025551234 <campaignId>
+
+# Reference data
+telnyx 10dlc usecases
+telnyx 10dlc verticals
 ```
 
-### 10DLC Sole Proprietor Registration
+#### Sole Proprietor Registration Flow
 
-For individuals and small businesses without an EIN:
-
-1. **Create brand** with `--sole-prop` flag
-2. **Verify** via OTP sent to your phone/email (within 24 hours)
-3. **Create campaign** describing your messaging use case
-4. **Wait for approval** (3-7 business days)
-5. **Assign phone numbers** to the approved campaign
+1. Create brand with `--sole-prop` flag
+2. Verify via OTP (within 24 hours)
+3. Create campaign
+4. Wait for approval (3-7 business days)
+5. Assign phone numbers
 
 **Fees (pass-through from carriers):**
 - Brand registration: $4 one-time
 - Campaign vetting: $15 per submission
 - Monthly maintenance: $2/month
 
-## Output Formats
-
-By default, output is human-readable. Add `--json` for raw JSON:
+### Storage (Coming Soon)
 
 ```bash
+telnyx storage bucket list
+telnyx storage object upload file.txt --bucket my-bucket
+```
+
+### Verify (Coming Soon)
+
+```bash
+telnyx verify send --to +12025551234
+```
+
+### Messaging (Coming Soon)
+
+```bash
+telnyx messaging send --to +12025551234 --text "Hello"
+```
+
+## Output Formats
+
+```bash
+# Human-readable (default)
+telnyx 10dlc brand list
+
+# JSON output
 telnyx 10dlc brand list --json
+```
+
+## Shell Autocomplete
+
+```bash
+telnyx autocomplete
 ```
 
 ## Help
@@ -102,6 +132,16 @@ telnyx 10dlc brand list --json
 telnyx --help
 telnyx 10dlc --help
 telnyx 10dlc brand --help
+```
+
+## Development
+
+```bash
+git clone https://github.com/team-telnyx/telnyx-api-cli
+cd telnyx-api-cli
+npm install
+npm run build
+./bin/run.js --help
 ```
 
 ## License

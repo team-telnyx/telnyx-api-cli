@@ -1,7 +1,42 @@
 {
   "name": "@telnyx/api-cli",
-  "version": "0.1.1",
   "description": "Command-line interface for Telnyx APIs",
+  "version": "0.2.0",
+  "author": "Telnyx <support@telnyx.com>",
+  "bin": {
+    "telnyx": "./bin/run.js"
+  },
+  "bugs": "https://github.com/team-telnyx/telnyx-api-cli/issues",
+  "homepage": "https://github.com/team-telnyx/telnyx-api-cli",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/team-telnyx/telnyx-api-cli.git"
+  },
+  "dependencies": {
+    "@inquirer/prompts": "^8.2.0",
+    "@oclif/core": "^4",
+    "@oclif/plugin-autocomplete": "^3",
+    "@oclif/plugin-help": "^6",
+    "telnyx": "^2"
+  },
+  "devDependencies": {
+    "@oclif/prettier-config": "^0.2.1",
+    "@oclif/test": "^4",
+    "@types/node": "^18",
+    "mocha": "^10",
+    "oclif": "^4",
+    "shx": "^0.3.3",
+    "ts-node": "^10",
+    "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "./bin",
+    "./dist",
+    "./oclif.manifest.json"
+  ],
   "keywords": [
     "telnyx",
     "cli",
@@ -11,33 +46,49 @@
     "voice",
     "telecom"
   ],
-  "homepage": "https://github.com/team-telnyx/telnyx-api-cli",
-  "bugs": {
-    "url": "https://github.com/team-telnyx/telnyx-api-cli/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/team-telnyx/telnyx-api-cli.git"
-  },
   "license": "MIT",
-  "author": "Telnyx <support@telnyx.com>",
-  "bin": {
-    "telnyx": "./bin/telnyx"
+  "main": "dist/index.js",
+  "type": "module",
+  "oclif": {
+    "bin": "telnyx",
+    "dirname": "telnyx",
+    "commands": "./dist/commands",
+    "plugins": [
+      "@oclif/plugin-help",
+      "@oclif/plugin-autocomplete"
+    ],
+    "topicSeparator": " ",
+    "topics": {
+      "auth": {
+        "description": "Manage API authentication"
+      },
+      "10dlc": {
+        "description": "10DLC brand and campaign registration"
+      },
+      "10dlc:brand": {
+        "description": "Manage 10DLC brands"
+      },
+      "10dlc:campaign": {
+        "description": "Manage 10DLC campaigns"
+      },
+      "storage": {
+        "description": "Manage cloud storage buckets and objects"
+      },
+      "verify": {
+        "description": "Phone number verification"
+      },
+      "messaging": {
+        "description": "Send and manage SMS/MMS messages"
+      }
+    }
   },
-  "files": [
-    "bin/",
-    "lib/",
-    "README.md",
-    "LICENSE"
-  ],
-  "engines": {
-    "node": ">=14"
-  },
-  "os": [
-    "darwin",
-    "linux"
-  ],
   "scripts": {
-    "test": "echo \"Tests coming soon\" && exit 0"
-  }
+    "build": "shx rm -rf dist && tsc -b",
+    "lint": "eslint",
+    "postpack": "shx rm -f oclif.manifest.json",
+    "prepack": "oclif manifest && oclif readme",
+    "test": "mocha --forbid-only \"test/**/*.test.ts\"",
+    "version": "oclif readme && git add README.md"
+  },
+  "types": "dist/index.d.ts"
 }
