@@ -2,6 +2,7 @@ import { getApiKey } from './config.js'
 
 const API_V2_BASE = 'https://api.telnyx.com/v2'
 const API_10DLC_BASE = 'https://api.telnyx.com/10dlc'
+const STORAGE_BASE = 'https://us-central-1.telnyxcloudstorage.com'
 
 export interface ApiOptions {
   profile?: string
@@ -102,4 +103,26 @@ export function validatePhone(phone: string): void {
   if (!/^\+?[0-9]+$/.test(phone)) {
     throw new Error(`Invalid phone number format. Use E.164 format (e.g., +12025551234)`)
   }
+}
+
+export function validateBucketName(name: string): void {
+  if (!/^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$/.test(name)) {
+    throw new Error('Invalid bucket name. Use lowercase letters, numbers, hyphens, and periods (3-63 chars)')
+  }
+}
+
+// Storage API helpers (S3-compatible)
+export const storage = {
+  getEndpoint(): string {
+    return STORAGE_BASE
+  },
+
+  getCredentials(profile?: string): { accessKeyId: string; secretAccessKey: string } {
+    const apiKey = getApiKey(profile)
+    if (!apiKey) {
+      throw new Error('No API key configured. Run "telnyx auth setup" or set TELNYX_API_KEY')
+    }
+    // Telnyx uses API key for both access key and secret
+    return { accessKeyId: apiKey, secretAccessKey: apiKey }
+  },
 }

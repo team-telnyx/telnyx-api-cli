@@ -13,6 +13,7 @@
     "url": "git+https://github.com/team-telnyx/telnyx-api-cli.git"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.978.0",
     "@inquirer/prompts": "^8.2.0",
     "@oclif/core": "^4",
     "@oclif/plugin-autocomplete": "^3",
