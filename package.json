@@ -1,0 +1,43 @@
+{
+  "name": "@telnyx/api-cli",
+  "version": "0.1.0",
+  "description": "Command-line interface for Telnyx APIs",
+  "keywords": [
+    "telnyx",
+    "cli",
+    "10dlc",
+    "sms",
+    "messaging",
+    "voice",
+    "telecom"
+  ],
+  "homepage": "https://github.com/team-telnyx/telnyx-api-cli",
+  "bugs": {
+    "url": "https://github.com/team-telnyx/telnyx-api-cli/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/team-telnyx/telnyx-api-cli.git"
+  },
+  "license": "MIT",
+  "author": "Telnyx <support@telnyx.com>",
+  "bin": {
+    "telnyx": "./bin/telnyx"
+  },
+  "files": [
+    "bin/",
+    "lib/",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=14"
+  },
+  "os": [
+    "darwin",
+    "linux"
+  ],
+  "scripts": {
+    "test": "echo \"Tests coming soon\" && exit 0"
+  }
+}
