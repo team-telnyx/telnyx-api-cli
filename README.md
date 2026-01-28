@@ -85,8 +85,15 @@ telnyx number get +15551234567
 telnyx number order +15551234567
 telnyx number order +15551234567 +15559876543 --messaging-profile-id <id>
 
+# Update number settings
+telnyx number update +15551234567 --connection-id <id>
+telnyx number update +15551234567 --messaging-profile-id <id>
+telnyx number update +15551234567 --tags production,us-west
+telnyx number update +15551234567 --call-forwarding --emergency-enabled
+
 # Release a number
 telnyx number delete +15551234567 --force
+telnyx number delete +15551234567 --dry-run
 ```
 
 ### Messaging
@@ -381,6 +388,33 @@ telnyx autocomplete
 | `--profile <name>` | Use a specific config profile |
 | `--json` | Output raw JSON |
 | `--help` | Show help |
+
+## Whoami
+
+Quick check of your authentication and account:
+
+```bash
+telnyx whoami
+telnyx whoami --profile production
+```
+
+## Verbose Mode
+
+Show HTTP requests for debugging:
+
+```bash
+telnyx number list --verbose
+telnyx message send --from +15551234567 --to +15559876543 --text "Test" -v
+```
+
+## Dry Run
+
+Preview destructive operations without executing:
+
+```bash
+telnyx number delete +15551234567 --dry-run
+telnyx number update +15551234567 --tags production --dry-run
+```
 
 ## Help
 

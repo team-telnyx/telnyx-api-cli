@@ -11,7 +11,29 @@ export abstract class BaseCommand extends Command {
       description: 'Output raw JSON',
       default: false,
     }),
+    verbose: Flags.boolean({
+      char: 'v',
+      description: 'Show detailed output including API requests',
+      default: false,
+    }),
   }
+
+  // Flags for commands that modify/delete resources
+  static destructiveFlags = {
+    ...BaseCommand.baseFlags,
+    force: Flags.boolean({
+      char: 'f',
+      description: 'Skip confirmation prompt',
+      default: false,
+    }),
+    'dry-run': Flags.boolean({
+      description: 'Show what would happen without making changes',
+      default: false,
+    }),
+  }
+
+  protected isVerbose = false
+  protected isDryRun = false
 
   protected outputJson(data: unknown): void {
     this.log(JSON.stringify(data, null, 2))
@@ -55,5 +77,22 @@ export abstract class BaseCommand extends Command {
 
   protected warning(message: string): void {
     this.log(`⚠ ${message}`)
+  }
+
+  protected debugLog(message: string): void {
+    if (this.isVerbose) {
+      this.log(`  → ${message}`)
+    }
+  }
+
+  protected dryRunLog(message: string): void {
+    this.log(`[DRY RUN] ${message}`)
+  }
+
+  protected async confirmOrForce(message: string, force: boolean): Promise<boolean> {
+    if (force) return true
+    
+    const { confirm } = await import('@inquirer/prompts')
+    return confirm({ message, default: false })
   }
 }
