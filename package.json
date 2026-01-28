@@ -1,7 +1,7 @@
 {
   "name": "@telnyx/api-cli",
   "description": "Command-line interface for Telnyx APIs",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "author": "Telnyx <support@telnyx.com>",
   "bin": {
     "telnyx": "./bin/run.js"
@@ -43,9 +43,21 @@
     "cli",
     "10dlc",
     "sms",
+    "mms",
     "messaging",
     "voice",
-    "telecom"
+    "voip",
+    "telecom",
+    "phone-numbers",
+    "verification",
+    "2fa",
+    "fax",
+    "video",
+    "storage",
+    "ai",
+    "llm",
+    "iot",
+    "sim"
   ],
   "license": "MIT",
   "main": "dist/index.js",
@@ -60,27 +72,38 @@
     ],
     "topicSeparator": " ",
     "topics": {
-      "auth": {
-        "description": "Manage API authentication"
-      },
-      "10dlc": {
-        "description": "10DLC brand and campaign registration"
-      },
-      "10dlc:brand": {
-        "description": "Manage 10DLC brands"
-      },
-      "10dlc:campaign": {
-        "description": "Manage 10DLC campaigns"
-      },
-      "storage": {
-        "description": "Manage cloud storage buckets and objects"
-      },
-      "verify": {
-        "description": "Phone number verification"
-      },
-      "messaging": {
-        "description": "Send and manage SMS/MMS messages"
-      }
+      "auth": { "description": "Manage API authentication" },
+      "10dlc": { "description": "10DLC brand and campaign registration" },
+      "10dlc:brand": { "description": "Manage 10DLC brands" },
+      "10dlc:campaign": { "description": "Manage 10DLC campaigns" },
+      "ai": { "description": "AI inference (chat, embeddings)" },
+      "assistant": { "description": "AI voice assistants" },
+      "billing": { "description": "Account balance and billing groups" },
+      "billing:group": { "description": "Manage billing groups" },
+      "call": { "description": "Voice call control" },
+      "connection": { "description": "Voice connections and applications" },
+      "e911": { "description": "E911 emergency services" },
+      "e911:address": { "description": "Emergency addresses" },
+      "fax": { "description": "Send and receive faxes" },
+      "lookup": { "description": "Phone number lookup" },
+      "message": { "description": "Send and manage SMS/MMS messages" },
+      "messaging-profile": { "description": "Messaging profile configuration" },
+      "number": { "description": "Phone number management" },
+      "porting": { "description": "Number porting" },
+      "porting:order": { "description": "Port-in orders" },
+      "sim": { "description": "IoT SIM card management" },
+      "storage": { "description": "Cloud storage (S3-compatible)" },
+      "storage:bucket": { "description": "Storage buckets" },
+      "storage:object": { "description": "Storage objects" },
+      "usage": { "description": "Usage reports and analytics" },
+      "verify": { "description": "Phone verification (2FA)" },
+      "verify:profile": { "description": "Verify profiles" },
+      "verify:template": { "description": "Verification message templates" },
+      "video": { "description": "Video rooms and conferencing" },
+      "video:room": { "description": "Video room management" },
+      "video:session": { "description": "Video sessions" },
+      "video:recording": { "description": "Video recordings" },
+      "voice-profile": { "description": "Outbound voice profiles" }
     }
   },
   "scripts": {
