@@ -1,0 +1,206 @@
+#!/usr/bin/env bash
+#
+# telnyx - CLI for Telnyx APIs
+# https://github.com/team-telnyx/telnyx-api-cli
+#
+
+set -euo pipefail
+
+VERSION="0.1.0"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LIB_DIR="${SCRIPT_DIR}/../lib"
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Config
+CONFIG_DIR="${HOME}/.config/telnyx"
+CONFIG_FILE="${CONFIG_DIR}/config.json"
+
+#
+# Utility functions
+#
+info() { echo -e "${BLUE}ℹ${NC} $*"; }
+success() { echo -e "${GREEN}✓${NC} $*"; }
+warn() { echo -e "${YELLOW}⚠${NC} $*" >&2; }
+error() { echo -e "${RED}✗${NC} $*" >&2; }
+die() { error "$@"; exit 1; }
+
+check_deps() {
+    local missing=()
+    for cmd in curl jq; do
+        if ! command -v "$cmd" &>/dev/null; then
+            missing+=("$cmd")
+        fi
+    done
+    if [[ ${#missing[@]} -gt 0 ]]; then
+        die "Missing required dependencies: ${missing[*]}"
+    fi
+}
+
+get_api_key() {
+    # Check environment first
+    if [[ -n "${TELNYX_API_KEY:-}" ]]; then
+        echo "$TELNYX_API_KEY"
+        return
+    fi
+    
+    # Check config file
+    if [[ -f "$CONFIG_FILE" ]]; then
+        local key
+        key=$(jq -r '.api_key // empty' "$CONFIG_FILE" 2>/dev/null)
+        if [[ -n "$key" ]]; then
+            echo "$key"
+            return
+        fi
+    fi
+    
+    return 1
+}
+
+require_api_key() {
+    if ! get_api_key &>/dev/null; then
+        die "No API key configured. Run 'telnyx auth setup' or set TELNYX_API_KEY"
+    fi
+}
+
+#
+# Auth commands
+#
+cmd_auth_setup() {
+    mkdir -p "$CONFIG_DIR"
+    
+    echo "Enter your Telnyx API key (from portal.telnyx.com):"
+    read -r -s api_key
+    echo
+    
+    if [[ -z "$api_key" ]]; then
+        die "API key cannot be empty"
+    fi
+    
+    # Validate the key
+    info "Validating API key..."
+    local response
+    response=$(curl -s -w "\n%{http_code}" \
+        -H "Authorization: Bearer $api_key" \
+        "https://api.telnyx.com/v2/balance")
+    
+    local http_code
+    http_code=$(echo "$response" | tail -n1)
+    
+    if [[ "$http_code" != "200" ]]; then
+        die "Invalid API key (HTTP $http_code)"
+    fi
+    
+    # Save config
+    echo "{\"api_key\": \"$api_key\"}" | jq . > "$CONFIG_FILE"
+    chmod 600 "$CONFIG_FILE"
+    
+    success "API key saved to $CONFIG_FILE"
+}
+
+cmd_auth_status() {
+    if get_api_key &>/dev/null; then
+        success "API key configured"
+        
+        # Show account info
+        local key
+        key=$(get_api_key)
+        local response
+        response=$(curl -s \
+            -H "Authorization: Bearer $key" \
+            "https://api.telnyx.com/v2/balance")
+        
+        local balance
+        balance=$(echo "$response" | jq -r '.data.balance // "unknown"')
+        info "Account balance: \$$balance"
+    else
+        warn "No API key configured"
+        echo "Run 'telnyx auth setup' to configure"
+    fi
+}
+
+#
+# Main command router
+#
+show_help() {
+    cat <<EOF
+telnyx - CLI for Telnyx APIs (v${VERSION})
+
+Usage: telnyx <module> <command> [options]
+
+Modules:
+  auth        Manage API authentication
+  10dlc       10DLC brand and campaign registration
+
+Auth Commands:
+  telnyx auth setup       Configure API key
+  telnyx auth status      Show current auth status
+
+10DLC Commands:
+  telnyx 10dlc wizard             Guided sole proprietor registration
+  telnyx 10dlc brand create       Create a new brand
+  telnyx 10dlc brand list         List all brands
+  telnyx 10dlc brand get <id>     Get brand details
+  telnyx 10dlc brand verify <id>  Submit OTP verification
+  telnyx 10dlc campaign create    Create a campaign
+  telnyx 10dlc campaign list      List campaigns
+  telnyx 10dlc assign <num> <id>  Assign number to campaign
+
+Options:
+  -h, --help      Show this help
+  -v, --version   Show version
+  --json          Output raw JSON (no formatting)
+
+Environment:
+  TELNYX_API_KEY  API key (alternative to 'auth setup')
+
+Examples:
+  telnyx auth setup
+  telnyx 10dlc wizard
+  telnyx 10dlc brand list --json
+
+EOF
+}
+
+main() {
+    check_deps
+    
+    if [[ $# -eq 0 ]]; then
+        show_help
+        exit 0
+    fi
+    
+    case "${1:-}" in
+        -h|--help)
+            show_help
+            exit 0
+            ;;
+        -v|--version)
+            echo "telnyx version $VERSION"
+            exit 0
+            ;;
+        auth)
+            shift
+            case "${1:-}" in
+                setup) cmd_auth_setup ;;
+                status) cmd_auth_status ;;
+                *) die "Unknown auth command: ${1:-}. Use 'telnyx auth --help'" ;;
+            esac
+            ;;
+        10dlc)
+            shift
+            source "${LIB_DIR}/10dlc.sh"
+            cmd_10dlc "$@"
+            ;;
+        *)
+            die "Unknown module: $1. Run 'telnyx --help' for usage."
+            ;;
+    esac
+}
+
+main "$@"
