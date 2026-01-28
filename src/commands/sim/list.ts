@@ -7,7 +7,7 @@ interface SimCard {
   iccid: string
   imsi?: string
   msisdn?: string
-  status: string
+  status: { value: string } | string
   sim_card_group_id?: string
   tags?: string[]
   created_at: string
@@ -93,7 +93,7 @@ export default class SimList extends BaseCommand {
       id: s.id.substring(0, 12) + '...',
       iccid: s.iccid,
       msisdn: s.msisdn || '-',
-      status: s.status,
+      status: typeof s.status === 'object' ? s.status.value : s.status,
       tags: s.tags?.join(', ') || '-',
     }))
 

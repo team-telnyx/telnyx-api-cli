@@ -90,10 +90,6 @@ telnyx number delete +15551234567 --force
 telnyx message send --from +15551234567 --to +15559876543 --text "Hello!"
 telnyx message send -f +15551234567 -t +15559876543 --text "Check this" --media https://example.com/image.jpg
 
-# List messages
-telnyx message list
-telnyx message list --direction outbound --type SMS
-
 # Get message details
 telnyx message get <message-id>
 ```
@@ -113,10 +109,6 @@ telnyx messaging-profile delete <id> --force
 # Make outbound calls
 telnyx call dial --from +15551234567 --to +15559876543 --connection-id <id>
 telnyx call dial -f +15551234567 -t +15559876543 --connection-id <id> --answering-machine-detection detect
-
-# List active calls
-telnyx call list
-telnyx call list --connection-id <id>
 
 # Call control
 telnyx call hangup <call-control-id>
