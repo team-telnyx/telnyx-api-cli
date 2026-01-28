@@ -11,16 +11,6 @@ interface BalanceResponse {
   }
 }
 
-interface UserResponse {
-  data: {
-    id: string
-    email: string
-    first_name?: string
-    last_name?: string
-    organization_id?: string
-  }
-}
-
 export default class AuthWhoami extends BaseCommand {
   static override description = 'Display current authentication info and account details'
 
@@ -49,7 +39,6 @@ export default class AuthWhoami extends BaseCommand {
 
     // Try to get account info
     let balance: BalanceResponse['data'] | null = null
-    let user: UserResponse['data'] | null = null
 
     try {
       const balanceResponse = await v2.get<BalanceResponse>('/balance', { 

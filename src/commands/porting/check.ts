@@ -1,4 +1,3 @@
-import { Flags } from '@oclif/core'
 import { BaseCommand } from '../../lib/base-command.js'
 import { v2, validatePhone } from '../../lib/api.js'
 
