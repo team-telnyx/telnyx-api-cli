@@ -1,7 +1,7 @@
 {
   "name": "@telnyx/api-cli",
   "description": "Command-line interface for Telnyx APIs",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": "Telnyx <support@telnyx.com>",
   "bin": {
     "telnyx": "./bin/run.js"
