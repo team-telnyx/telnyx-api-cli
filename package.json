@@ -186,8 +186,8 @@
     "postpack": "shx rm -f oclif.manifest.json",
     "prepack": "oclif manifest && oclif readme",
     "test": "mocha --forbid-only \"test/**/*.test.ts\"",
-    "test:coverage": "c8 --reporter=text --reporter=lcov mocha --forbid-only \"test/**/*.test.ts\"",
-    "test:ci": "c8 --reporter=lcov mocha --forbid-only \"test/**/*.test.ts\"",
+    "test:coverage": "c8 mocha --forbid-only \"test/**/*.test.ts\"",
+    "test:ci": "mocha --forbid-only \"test/**/*.test.ts\"",
     "version": "oclif readme && git add README.md"
   },
   "types": "dist/index.d.ts"

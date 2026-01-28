@@ -32,20 +32,13 @@ jobs:
       - name: Lint
         run: npm run lint --if-present
 
-      - name: Test with coverage
-        run: npm run test:ci
+      - name: Run tests
+        run: npm test
 
       - name: Verify CLI runs
         run: |
           ./bin/run.js --version
           ./bin/run.js --help
-
-      - name: Upload coverage to Codecov
-        if: matrix.node-version == 20
-        uses: codecov/codecov-action@v4
-        with:
-          files: ./coverage/lcov.info
-          fail_ci_if_error: false
 
   release-dry-run:
     runs-on: ubuntu-latest
