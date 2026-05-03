@@ -18,7 +18,7 @@
     "@oclif/core": "^4",
     "@oclif/plugin-autocomplete": "^3",
     "@oclif/plugin-help": "^6",
-    "telnyx": "^2"
+    "telnyx": "^6"
   },
   "devDependencies": {
     "@oclif/prettier-config": "^0.2.1",
