@@ -25,6 +25,18 @@ export abstract class BaseCommand extends Command {
     }),
   }
 
+  static storageFlags = {
+    ...BaseCommand.baseFlags,
+    region: Flags.string({
+      description: 'Storage region (defaults to us-central-1)',
+      env: 'TELNYX_STORAGE_REGION',
+    }),
+    endpoint: Flags.string({
+      description: 'Storage endpoint URL (overrides endpoint derived from region)',
+      env: 'TELNYX_STORAGE_ENDPOINT',
+    }),
+  }
+
   /** Get the output format from flags */
   protected getOutputFormat(flags: { json?: boolean; output?: string }): OutputFormat {
     if (flags.output) return flags.output as OutputFormat

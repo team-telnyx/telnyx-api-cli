@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import { clearMocks, mockApiResponse, mocks } from '../helpers/index.js'
-import { v2, validateId, validatePhone, validateBucketName, TelnyxApiError } from '../../src/lib/api.js'
+import { v2, validateId, validatePhone, validateBucketName, TelnyxApiError, storage } from '../../src/lib/api.js'
 
 describe('api', () => {
   beforeEach(() => {
@@ -84,6 +84,78 @@ describe('api', () => {
     it('should reject invalid phone numbers', () => {
       expect(() => validatePhone('abc')).to.throw(/Invalid phone/)
       expect(() => validatePhone('123')).to.throw(/Invalid phone/) // Too short
+    })
+  })
+
+  describe('storage configuration', () => {
+    const originalStorageRegion = process.env.TELNYX_STORAGE_REGION
+    const originalStorageEndpoint = process.env.TELNYX_STORAGE_ENDPOINT
+    const originalApiKey = process.env.TELNYX_API_KEY
+
+    afterEach(() => {
+      if (originalStorageRegion === undefined) {
+        delete process.env.TELNYX_STORAGE_REGION
+      } else {
+        process.env.TELNYX_STORAGE_REGION = originalStorageRegion
+      }
+
+      if (originalStorageEndpoint === undefined) {
+        delete process.env.TELNYX_STORAGE_ENDPOINT
+      } else {
+        process.env.TELNYX_STORAGE_ENDPOINT = originalStorageEndpoint
+      }
+
+      if (originalApiKey === undefined) {
+        delete process.env.TELNYX_API_KEY
+      } else {
+        process.env.TELNYX_API_KEY = originalApiKey
+      }
+    })
+
+    it('should default storage operations to us-central-1', () => {
+      delete process.env.TELNYX_STORAGE_REGION
+      delete process.env.TELNYX_STORAGE_ENDPOINT
+
+      expect(storage.getRegion()).to.equal('us-central-1')
+      expect(storage.getEndpoint()).to.equal('https://us-central-1.telnyxcloudstorage.com')
+    })
+
+    it('should derive endpoint from storage region', () => {
+      expect(storage.getRegion({ region: 'eu central' })).to.equal('eu-central-1')
+      expect(storage.getEndpoint({ region: 'eu central' })).to.equal('https://eu-central-1.telnyxcloudstorage.com')
+    })
+
+    it('should infer region from endpoint when region is not set', () => {
+      const endpoint = 'https://eu-central-1.telnyxcloudstorage.com'
+
+      expect(storage.getRegion({ endpoint })).to.equal('eu-central-1')
+      expect(storage.getEndpoint({ endpoint })).to.equal(endpoint)
+    })
+
+    it('should use env vars for storage region and endpoint', () => {
+      process.env.TELNYX_STORAGE_REGION = 'eu-central'
+      delete process.env.TELNYX_STORAGE_ENDPOINT
+
+      expect(storage.getRegion()).to.equal('eu-central-1')
+      expect(storage.getEndpoint()).to.equal('https://eu-central-1.telnyxcloudstorage.com')
+
+      delete process.env.TELNYX_STORAGE_REGION
+      process.env.TELNYX_STORAGE_ENDPOINT = 'https://eu-central-1.telnyxcloudstorage.com'
+
+      expect(storage.getRegion()).to.equal('eu-central-1')
+      expect(storage.getEndpoint()).to.equal('https://eu-central-1.telnyxcloudstorage.com')
+    })
+
+    it('should build S3 client config from region and credentials', () => {
+      process.env.TELNYX_API_KEY = 'KEY_test1234567890abcdef'
+
+      const config = storage.getClientConfig({ region: 'eu-central' })
+
+      expect(config.endpoint).to.equal('https://eu-central-1.telnyxcloudstorage.com')
+      expect(config.region).to.equal('eu-central-1')
+      expect(config.forcePathStyle).to.equal(true)
+      expect(config.credentials.accessKeyId).to.equal('KEY_test1234567890abcdef')
+      expect(config.credentials.secretAccessKey).to.equal('KEY_test1234567890abcdef')
     })
   })
 

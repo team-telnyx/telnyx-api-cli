@@ -2,7 +2,45 @@ import { getApiKey } from './config.js'
 
 const API_V2_BASE = 'https://api.telnyx.com/v2'
 const API_10DLC_BASE = 'https://api.telnyx.com/10dlc'
-const STORAGE_BASE = 'https://us-central-1.telnyxcloudstorage.com'
+const DEFAULT_STORAGE_REGION = 'us-central-1'
+const STORAGE_ENDPOINT_SUFFIX = '.telnyxcloudstorage.com'
+
+export interface StorageOptions {
+  profile?: string
+  region?: string
+  endpoint?: string
+}
+
+function normalizeStorageRegion(region: string): string {
+  const normalized = region.trim().toLowerCase().replace(/[ _]/g, '-')
+  const aliases: Record<string, string> = {
+    'us-central': 'us-central-1',
+    'eu-central': 'eu-central-1',
+  }
+
+  return aliases[normalized] || normalized
+}
+
+function storageEndpointForRegion(region: string): string {
+  return `https://${normalizeStorageRegion(region)}${STORAGE_ENDPOINT_SUFFIX}`
+}
+
+function inferStorageRegionFromEndpoint(endpoint: string): string | undefined {
+  let hostname: string
+
+  try {
+    hostname = new URL(endpoint).hostname
+  } catch {
+    return undefined
+  }
+
+  if (!hostname.endsWith(STORAGE_ENDPOINT_SUFFIX)) {
+    return undefined
+  }
+
+  const region = hostname.slice(0, -STORAGE_ENDPOINT_SUFFIX.length)
+  return region ? normalizeStorageRegion(region) : undefined
+}
 
 export interface ApiOptions {
   profile?: string
@@ -286,8 +324,36 @@ export function validateBucketName(name: string): void {
 
 // Storage API helpers (S3-compatible)
 export const storage = {
-  getEndpoint(): string {
-    return STORAGE_BASE
+  getRegion(options: StorageOptions = {}): string {
+    const explicitRegion = options.region || process.env.TELNYX_STORAGE_REGION
+    if (explicitRegion) {
+      return normalizeStorageRegion(explicitRegion)
+    }
+
+    const endpoint = options.endpoint || process.env.TELNYX_STORAGE_ENDPOINT
+    if (endpoint) {
+      return inferStorageRegionFromEndpoint(endpoint) || DEFAULT_STORAGE_REGION
+    }
+
+    return DEFAULT_STORAGE_REGION
+  },
+
+  getEndpoint(options: StorageOptions = {}): string {
+    return options.endpoint || process.env.TELNYX_STORAGE_ENDPOINT || storageEndpointForRegion(this.getRegion(options))
+  },
+
+  getClientConfig(options: StorageOptions = {}) {
+    const creds = this.getCredentials(options.profile)
+
+    return {
+      endpoint: this.getEndpoint(options),
+      region: this.getRegion(options),
+      credentials: {
+        accessKeyId: creds.accessKeyId,
+        secretAccessKey: creds.secretAccessKey,
+      },
+      forcePathStyle: true,
+    }
   },
 
   getCredentials(profile?: string): { accessKeyId: string; secretAccessKey: string } {

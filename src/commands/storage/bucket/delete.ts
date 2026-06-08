@@ -18,7 +18,7 @@ export default class StorageBucketDelete extends BaseCommand {
   }
 
   static override flags = {
-    ...BaseCommand.baseFlags,
+    ...BaseCommand.storageFlags,
     force: Flags.boolean({
       char: 'f',
       description: 'Skip confirmation',
@@ -37,17 +37,7 @@ export default class StorageBucketDelete extends BaseCommand {
       return
     }
 
-    const creds = storage.getCredentials(flags.profile)
-    
-    const client = new S3Client({
-      endpoint: storage.getEndpoint(),
-      region: 'us-central-1',
-      credentials: {
-        accessKeyId: creds.accessKeyId,
-        secretAccessKey: creds.secretAccessKey,
-      },
-      forcePathStyle: true,
-    })
+    const client = new S3Client(storage.getClientConfig(flags))
 
     this.info(`Deleting bucket "${args.name}"...`)
 
