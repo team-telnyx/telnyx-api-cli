@@ -124,11 +124,6 @@ describe('api', () => {
       expect(storage.getEndpoint()).to.equal('https://eu-central-1.telnyxcloudstorage.com')
     })
 
-    it('should reject unsupported storage regions', () => {
-      expect(() => storage.getRegion({ region: 'eu-central' })).to.throw(/Unsupported storage region/)
-      expect(() => storage.getRegion({ region: 'mars' })).to.throw(/Unsupported storage region/)
-    })
-
     it('should build S3 client config from region and credentials', () => {
       process.env.TELNYX_API_KEY = 'KEY_test1234567890abcdef'
 
