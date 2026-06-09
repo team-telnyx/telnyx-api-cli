@@ -8,7 +8,6 @@ const STORAGE_ENDPOINT_SUFFIX = '.telnyxcloudstorage.com'
 export interface StorageOptions {
   profile?: string
   region?: string
-  endpoint?: string
 }
 
 function normalizeStorageRegion(region: string): string {
@@ -23,23 +22,6 @@ function normalizeStorageRegion(region: string): string {
 
 function storageEndpointForRegion(region: string): string {
   return `https://${normalizeStorageRegion(region)}${STORAGE_ENDPOINT_SUFFIX}`
-}
-
-function inferStorageRegionFromEndpoint(endpoint: string): string | undefined {
-  let hostname: string
-
-  try {
-    hostname = new URL(endpoint).hostname
-  } catch {
-    return undefined
-  }
-
-  if (!hostname.endsWith(STORAGE_ENDPOINT_SUFFIX)) {
-    return undefined
-  }
-
-  const region = hostname.slice(0, -STORAGE_ENDPOINT_SUFFIX.length)
-  return region ? normalizeStorageRegion(region) : undefined
 }
 
 export interface ApiOptions {
@@ -330,16 +312,11 @@ export const storage = {
       return normalizeStorageRegion(explicitRegion)
     }
 
-    const endpoint = options.endpoint || process.env.TELNYX_STORAGE_ENDPOINT
-    if (endpoint) {
-      return inferStorageRegionFromEndpoint(endpoint) || DEFAULT_STORAGE_REGION
-    }
-
     return DEFAULT_STORAGE_REGION
   },
 
   getEndpoint(options: StorageOptions = {}): string {
-    return options.endpoint || process.env.TELNYX_STORAGE_ENDPOINT || storageEndpointForRegion(this.getRegion(options))
+    return storageEndpointForRegion(this.getRegion(options))
   },
 
   getClientConfig(options: StorageOptions = {}) {

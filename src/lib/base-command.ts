@@ -31,10 +31,6 @@ export abstract class BaseCommand extends Command {
       description: 'Storage region (defaults to us-central-1)',
       env: 'TELNYX_STORAGE_REGION',
     }),
-    endpoint: Flags.string({
-      description: 'Storage endpoint URL (overrides endpoint derived from region)',
-      env: 'TELNYX_STORAGE_ENDPOINT',
-    }),
   }
 
   /** Get the output format from flags */

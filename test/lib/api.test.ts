@@ -89,7 +89,6 @@ describe('api', () => {
 
   describe('storage configuration', () => {
     const originalStorageRegion = process.env.TELNYX_STORAGE_REGION
-    const originalStorageEndpoint = process.env.TELNYX_STORAGE_ENDPOINT
     const originalApiKey = process.env.TELNYX_API_KEY
 
     afterEach(() => {
@@ -97,12 +96,6 @@ describe('api', () => {
         delete process.env.TELNYX_STORAGE_REGION
       } else {
         process.env.TELNYX_STORAGE_REGION = originalStorageRegion
-      }
-
-      if (originalStorageEndpoint === undefined) {
-        delete process.env.TELNYX_STORAGE_ENDPOINT
-      } else {
-        process.env.TELNYX_STORAGE_ENDPOINT = originalStorageEndpoint
       }
 
       if (originalApiKey === undefined) {
@@ -114,7 +107,6 @@ describe('api', () => {
 
     it('should default storage operations to us-central-1', () => {
       delete process.env.TELNYX_STORAGE_REGION
-      delete process.env.TELNYX_STORAGE_ENDPOINT
 
       expect(storage.getRegion()).to.equal('us-central-1')
       expect(storage.getEndpoint()).to.equal('https://us-central-1.telnyxcloudstorage.com')
@@ -125,22 +117,8 @@ describe('api', () => {
       expect(storage.getEndpoint({ region: 'eu central' })).to.equal('https://eu-central-1.telnyxcloudstorage.com')
     })
 
-    it('should infer region from endpoint when region is not set', () => {
-      const endpoint = 'https://eu-central-1.telnyxcloudstorage.com'
-
-      expect(storage.getRegion({ endpoint })).to.equal('eu-central-1')
-      expect(storage.getEndpoint({ endpoint })).to.equal(endpoint)
-    })
-
-    it('should use env vars for storage region and endpoint', () => {
+    it('should use env var for storage region', () => {
       process.env.TELNYX_STORAGE_REGION = 'eu-central'
-      delete process.env.TELNYX_STORAGE_ENDPOINT
-
-      expect(storage.getRegion()).to.equal('eu-central-1')
-      expect(storage.getEndpoint()).to.equal('https://eu-central-1.telnyxcloudstorage.com')
-
-      delete process.env.TELNYX_STORAGE_REGION
-      process.env.TELNYX_STORAGE_ENDPOINT = 'https://eu-central-1.telnyxcloudstorage.com'
 
       expect(storage.getRegion()).to.equal('eu-central-1')
       expect(storage.getEndpoint()).to.equal('https://eu-central-1.telnyxcloudstorage.com')
