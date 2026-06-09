@@ -113,21 +113,26 @@ describe('api', () => {
     })
 
     it('should derive endpoint from storage region', () => {
-      expect(storage.getRegion({ region: 'eu central' })).to.equal('eu-central-1')
-      expect(storage.getEndpoint({ region: 'eu central' })).to.equal('https://eu-central-1.telnyxcloudstorage.com')
+      expect(storage.getRegion({ region: 'eu-central-1' })).to.equal('eu-central-1')
+      expect(storage.getEndpoint({ region: 'eu-central-1' })).to.equal('https://eu-central-1.telnyxcloudstorage.com')
     })
 
     it('should use env var for storage region', () => {
-      process.env.TELNYX_STORAGE_REGION = 'eu-central'
+      process.env.TELNYX_STORAGE_REGION = 'eu-central-1'
 
       expect(storage.getRegion()).to.equal('eu-central-1')
       expect(storage.getEndpoint()).to.equal('https://eu-central-1.telnyxcloudstorage.com')
     })
 
+    it('should reject unsupported storage regions', () => {
+      expect(() => storage.getRegion({ region: 'eu-central' })).to.throw(/Unsupported storage region/)
+      expect(() => storage.getRegion({ region: 'mars' })).to.throw(/Unsupported storage region/)
+    })
+
     it('should build S3 client config from region and credentials', () => {
       process.env.TELNYX_API_KEY = 'KEY_test1234567890abcdef'
 
-      const config = storage.getClientConfig({ region: 'eu-central' })
+      const config = storage.getClientConfig({ region: 'eu-central-1' })
 
       expect(config.endpoint).to.equal('https://eu-central-1.telnyxcloudstorage.com')
       expect(config.region).to.equal('eu-central-1')

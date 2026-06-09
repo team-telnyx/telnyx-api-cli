@@ -4,24 +4,26 @@ const API_V2_BASE = 'https://api.telnyx.com/v2'
 const API_10DLC_BASE = 'https://api.telnyx.com/10dlc'
 const DEFAULT_STORAGE_REGION = 'us-central-1'
 const STORAGE_ENDPOINT_SUFFIX = '.telnyxcloudstorage.com'
+const SUPPORTED_STORAGE_REGIONS = ['us-central-1', 'eu-central-1'] as const
 
 export interface StorageOptions {
   profile?: string
   region?: string
 }
 
-function normalizeStorageRegion(region: string): string {
-  const normalized = region.trim().toLowerCase().replace(/[ _]/g, '-')
-  const aliases: Record<string, string> = {
-    'us-central': 'us-central-1',
-    'eu-central': 'eu-central-1',
+function validateStorageRegion(region: string): string {
+  if (SUPPORTED_STORAGE_REGIONS.includes(region as typeof SUPPORTED_STORAGE_REGIONS[number])) {
+    return region
   }
 
-  return aliases[normalized] || normalized
+  throw new Error(
+    `Unsupported storage region: "${region}". ` +
+    `Supported regions: ${SUPPORTED_STORAGE_REGIONS.join(', ')}`
+  )
 }
 
 function storageEndpointForRegion(region: string): string {
-  return `https://${normalizeStorageRegion(region)}${STORAGE_ENDPOINT_SUFFIX}`
+  return `https://${region}${STORAGE_ENDPOINT_SUFFIX}`
 }
 
 export interface ApiOptions {
@@ -309,7 +311,7 @@ export const storage = {
   getRegion(options: StorageOptions = {}): string {
     const explicitRegion = options.region || process.env.TELNYX_STORAGE_REGION
     if (explicitRegion) {
-      return normalizeStorageRegion(explicitRegion)
+      return validateStorageRegion(explicitRegion)
     }
 
     return DEFAULT_STORAGE_REGION
