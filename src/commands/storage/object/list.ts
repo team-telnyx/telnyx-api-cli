@@ -20,7 +20,7 @@ export default class StorageObjectList extends BaseCommand {
   }
 
   static override flags = {
-    ...BaseCommand.baseFlags,
+    ...BaseCommand.storageFlags,
     prefix: Flags.string({
       description: 'Filter by key prefix',
     }),
@@ -36,17 +36,7 @@ export default class StorageObjectList extends BaseCommand {
 
     validateBucketName(args.bucket)
 
-    const creds = storage.getCredentials(flags.profile)
-    
-    const client = new S3Client({
-      endpoint: storage.getEndpoint(),
-      region: 'us-central-1',
-      credentials: {
-        accessKeyId: creds.accessKeyId,
-        secretAccessKey: creds.secretAccessKey,
-      },
-      forcePathStyle: true,
-    })
+    const client = new S3Client(storage.getClientConfig(flags))
 
     this.info(`Listing objects in "${args.bucket}"...`)
 

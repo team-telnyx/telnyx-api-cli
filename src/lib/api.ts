@@ -2,7 +2,17 @@ import { getApiKey } from './config.js'
 
 const API_V2_BASE = 'https://api.telnyx.com/v2'
 const API_10DLC_BASE = 'https://api.telnyx.com/10dlc'
-const STORAGE_BASE = 'https://us-central-1.telnyxcloudstorage.com'
+const DEFAULT_STORAGE_REGION = 'us-central-1'
+const STORAGE_ENDPOINT_SUFFIX = '.telnyxcloudstorage.com'
+
+export interface StorageOptions {
+  profile?: string
+  region?: string
+}
+
+function storageEndpointForRegion(region: string): string {
+  return `https://${region}${STORAGE_ENDPOINT_SUFFIX}`
+}
 
 export interface ApiOptions {
   profile?: string
@@ -286,8 +296,31 @@ export function validateBucketName(name: string): void {
 
 // Storage API helpers (S3-compatible)
 export const storage = {
-  getEndpoint(): string {
-    return STORAGE_BASE
+  getRegion(options: StorageOptions = {}): string {
+    const explicitRegion = options.region || process.env.TELNYX_STORAGE_REGION
+    if (explicitRegion) {
+      return explicitRegion
+    }
+
+    return DEFAULT_STORAGE_REGION
+  },
+
+  getEndpoint(options: StorageOptions = {}): string {
+    return storageEndpointForRegion(this.getRegion(options))
+  },
+
+  getClientConfig(options: StorageOptions = {}) {
+    const creds = this.getCredentials(options.profile)
+
+    return {
+      endpoint: this.getEndpoint(options),
+      region: this.getRegion(options),
+      credentials: {
+        accessKeyId: creds.accessKeyId,
+        secretAccessKey: creds.secretAccessKey,
+      },
+      forcePathStyle: true,
+    }
   },
 
   getCredentials(profile?: string): { accessKeyId: string; secretAccessKey: string } {

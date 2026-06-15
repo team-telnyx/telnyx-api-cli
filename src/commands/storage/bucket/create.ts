@@ -19,7 +19,7 @@ export default class StorageBucketCreate extends BaseCommand {
   }
 
   static override flags = {
-    ...BaseCommand.baseFlags,
+    ...BaseCommand.storageFlags,
   }
 
   public async run(): Promise<void> {
@@ -27,17 +27,7 @@ export default class StorageBucketCreate extends BaseCommand {
 
     validateBucketName(args.name)
 
-    const creds = storage.getCredentials(flags.profile)
-    
-    const client = new S3Client({
-      endpoint: storage.getEndpoint(),
-      region: 'us-central-1',
-      credentials: {
-        accessKeyId: creds.accessKeyId,
-        secretAccessKey: creds.secretAccessKey,
-      },
-      forcePathStyle: true,
-    })
+    const client = new S3Client(storage.getClientConfig(flags))
 
     this.info(`Creating bucket "${args.name}"...`)
 

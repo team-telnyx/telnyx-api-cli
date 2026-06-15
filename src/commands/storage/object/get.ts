@@ -28,7 +28,7 @@ export default class StorageObjectGet extends BaseCommand {
   }
 
   static override flags = {
-    ...BaseCommand.baseFlags,
+    ...BaseCommand.storageFlags,
     output: Flags.string({
       char: 'o',
       description: 'Output file path (- for stdout)',
@@ -40,17 +40,7 @@ export default class StorageObjectGet extends BaseCommand {
 
     validateBucketName(args.bucket)
 
-    const creds = storage.getCredentials(flags.profile)
-    
-    const client = new S3Client({
-      endpoint: storage.getEndpoint(),
-      region: 'us-central-1',
-      credentials: {
-        accessKeyId: creds.accessKeyId,
-        secretAccessKey: creds.secretAccessKey,
-      },
-      forcePathStyle: true,
-    })
+    const client = new S3Client(storage.getClientConfig(flags))
 
     const outputPath = flags.output || basename(args.key)
     const toStdout = outputPath === '-'

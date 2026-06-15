@@ -11,23 +11,13 @@ export default class StorageBucketList extends BaseCommand {
   ]
 
   static override flags = {
-    ...BaseCommand.baseFlags,
+    ...BaseCommand.storageFlags,
   }
 
   public async run(): Promise<void> {
     const { flags } = await this.parse(StorageBucketList)
 
-    const creds = storage.getCredentials(flags.profile)
-    
-    const client = new S3Client({
-      endpoint: storage.getEndpoint(),
-      region: 'us-central-1',
-      credentials: {
-        accessKeyId: creds.accessKeyId,
-        secretAccessKey: creds.secretAccessKey,
-      },
-      forcePathStyle: true,
-    })
+    const client = new S3Client(storage.getClientConfig(flags))
 
     this.info('Fetching buckets...')
 

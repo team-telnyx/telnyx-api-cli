@@ -26,7 +26,7 @@ export default class StorageObjectPut extends BaseCommand {
   }
 
   static override flags = {
-    ...BaseCommand.baseFlags,
+    ...BaseCommand.storageFlags,
     key: Flags.string({
       char: 'k',
       description: 'Object key (defaults to filename)',
@@ -55,17 +55,7 @@ export default class StorageObjectPut extends BaseCommand {
 
     const key = flags.key || basename(args.file)
 
-    const creds = storage.getCredentials(flags.profile)
-    
-    const client = new S3Client({
-      endpoint: storage.getEndpoint(),
-      region: 'us-central-1',
-      credentials: {
-        accessKeyId: creds.accessKeyId,
-        secretAccessKey: creds.secretAccessKey,
-      },
-      forcePathStyle: true,
-    })
+    const client = new S3Client(storage.getClientConfig(flags))
 
     this.info(`Uploading "${args.file}" to "${args.bucket}/${key}" (${formatBytes(fileStats.size)})...`)
 
@@ -82,7 +72,7 @@ export default class StorageObjectPut extends BaseCommand {
     this.success(`Uploaded to ${args.bucket}/${key}`)
 
     if (flags.public) {
-      this.log(`Public URL: ${storage.getEndpoint()}/${args.bucket}/${key}`)
+      this.log(`Public URL: ${storage.getEndpoint(flags)}/${args.bucket}/${key}`)
     }
   }
 }
